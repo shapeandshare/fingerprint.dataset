@@ -8,7 +8,7 @@ from ..contracts.source_type import SourceType
 
 # Load data set
 data_set: List[FileRecord] = []
-for child in (Path("..") / "hashes").glob("**/*.json"):
+for child in (Path(".") / "hashes").glob("**/*.json"):
     if child.is_file():
         with open(child.resolve().as_posix(), mode="r", encoding="utf-8") as file:
             data_set.append(FileRecord(**json.load(file)))
@@ -26,6 +26,6 @@ for record in data_set:
     row: List = [name_hash.value, record.path, data_hash.value]
     tabular_representation.append(row)
 
-with open((Path("..") / "file_list.csv").resolve().as_posix(), mode="w", encoding="utf-8", newline="") as file:
+with open((Path(".") / "file_list.csv").resolve().as_posix(), mode="w", encoding="utf-8", newline="") as file:
     writer = csv.writer(file)
     writer.writerows(tabular_representation)
