@@ -6,8 +6,8 @@ from typing import List
 
 from tqdm import tqdm
 
-from contracts.dtos.file_record import FileRecord
-from contracts.source_type import SourceType
+from ..contracts.dtos.file_record import FileRecord
+from ..contracts.source_type import SourceType
 
 
 def serialize_file_data(files: List[FileRecord]) -> List:
@@ -18,7 +18,7 @@ def serialize_file_data(files: List[FileRecord]) -> List:
 
 
 def load_data() -> List:
-    with open("../file_list.json", mode="r", encoding="utf-8") as file:
+    with open("file_list.json", mode="r", encoding="utf-8") as file:
         return json.load(file)
 
 
@@ -47,7 +47,7 @@ def generate_hash(file_path: str) -> FileRecord:
 
 
 def generate_file_list_hashes() -> None:
-    output_base: Path = Path("../..") / "hashes"
+    output_base: Path = Path(".") / "hashes"
 
     file_list: List[str] = load_data()
     for file_path in tqdm(file_list):
