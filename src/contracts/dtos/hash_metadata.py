@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from contracts.source_type import SourceType
+from ..source_type import SourceType
 
 
 class HashMetadata(BaseModel):

@@ -6,7 +6,7 @@ file_list: List = []
 
 # "G:\Dropbox"
 # root_dir: Path = Path("G:/Dropbox")
-root_dir: Path = Path("..")
+root_dir: Path = Path("../..")
 for child in root_dir.glob("**/*"):
     if child.is_file():
         file_list.append(child.resolve().as_posix())

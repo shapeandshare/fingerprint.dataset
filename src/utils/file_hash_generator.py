@@ -47,7 +47,7 @@ def generate_hash(file_path: str) -> FileRecord:
 
 
 def generate_file_list_hashes() -> None:
-    output_base: Path = Path("..") / "hashes"
+    output_base: Path = Path("../..") / "hashes"
 
     file_list: List[str] = load_data()
     for file_path in tqdm(file_list):

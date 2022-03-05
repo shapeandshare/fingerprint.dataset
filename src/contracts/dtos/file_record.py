@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from contracts.dtos.hash_metadata import HashMetadata
+from .hash_metadata import HashMetadata
 
 
 class FileRecord(BaseModel):
