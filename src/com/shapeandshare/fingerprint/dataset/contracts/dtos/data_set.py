@@ -57,7 +57,7 @@ class DataSet(BaseModel):
             with open(file=self.txt_file.resolve().as_posix(), mode="w", encoding="utf-8") as file:
                 for child in tqdm(self.search_path.glob("**/*")):
                     if child.is_file():
-                        file_path: str = child.resolve().as_posix()
+                        file_path: str = child.as_posix()
                         file.write(f"{file_path}\r\n")
                         logging.getLogger(__name__).debug(file_path)
 
@@ -113,7 +113,7 @@ class DataSet(BaseModel):
                         data_hash = [hash for hash in record.hash if hash.source == SourceType.DATA][0]
                         writer.writerow(
                             [
-                                child.resolve().as_posix(),
+                                record.path,
                                 data_hash.value,
                                 record.size,
                                 record.modified,
