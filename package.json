@@ -1,0 +1,15 @@
+{
+  "name": "com.shapeandshare.fingerprint.dataset",
+  "version": "0.1.0b1",
+  "description": "Generates file hash reports",
+  "scripts": {
+    "clean": "rimraf dist src/com_shapeandshare_fingerprint_dataset.egg-info **/__pycache__",
+    "prebuild": "pip install -r ./requirements.txt",
+    "build": "python -m build"
+  },
+  "author": "Joshua C. Burt",
+  "license": "MIT",
+  "devDependencies": {
+    "rimraf": "^3.0.2"
+  }
+}
