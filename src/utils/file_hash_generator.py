@@ -1,8 +1,7 @@
 import hashlib
 import json
-import uuid
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Dict
 
 from tqdm import tqdm
 
@@ -17,48 +16,62 @@ def serialize_file_data(files: List[FileRecord]) -> List:
     return raw_list
 
 
-def load_data() -> List:
-    with open("file_list.json", mode="r", encoding="utf-8") as file:
-        return json.load(file)
-
-
 def generate_file_path_hash(file_path: str) -> str:
     filename_hash = hashlib.sha256(file_path.encode())
     return filename_hash.hexdigest()
 
 
-def generate_hash(file_path: str) -> FileRecord:
-    with open(file_path, mode="rb") as file:
-        filename_hash = hashlib.sha256(file_path.encode())
-        filename_hash_hex_digest: str = filename_hash.hexdigest()
+def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> FileRecord:
+    if file_record:
+        partial_record: Dict = file_record.dict(exclude_unset=True)
+    else:
+        partial_record: Dict = {}
 
-        file_hash = hashlib.sha256(file.read())
-        file_hex_digest: str = file_hash.hexdigest()
-        return FileRecord(
-            **{
-                "id": str(uuid.uuid4()),
-                "path": file_path,
-                "hash": [
-                    {"source": SourceType.DATA, "type": "sha256", "value": file_hex_digest},
-                    {"source": SourceType.NAME, "type": "sha256", "value": filename_hash_hex_digest},
-                ],
-            }
-        )
+    if "path" not in partial_record:
+        partial_record["path"] = file_path
+
+    if "id" in partial_record:
+        del partial_record["id"]
+
+    if "hash" not in partial_record:
+        partial_record["hash"] = []
+
+    if "size" not in partial_record:
+        partial_record["size"] = Path(file_path).stat().st_size  # Size in bytes | https://docs.python.org/3/library/os.html#os.stat_result
+
+    if "modified" not in partial_record:
+        partial_record["modified"] = Path(file_path).stat().st_mtime  # unix time stamp
+
+    data: List = [hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA]
+    partial_record["hash"] = data  # filter out other types ..
+
+    if len(data) < 1:
+        with open(file_path, mode="rb") as file:
+            file_hash = hashlib.sha256(file.read())
+            file_hex_digest: str = file_hash.hexdigest()
+            partial_record["hash"].append({"source": SourceType.DATA, "type": "sha256", "value": file_hex_digest})
+
+    return FileRecord(**partial_record)
 
 
-def generate_file_list_hashes() -> None:
-    output_base: Path = Path(".") / "hashes"
+def generate_file_list_hashes(base: Optional[Path] = None) -> None:
+    if not base:
+        base: Path = Path(".") / "hashes"
 
-    file_list: List[str] = load_data()
-    for file_path in tqdm(file_list):
-        file_path_hash: str = generate_file_path_hash(file_path=file_path)
-        file_record_path: Path = output_base / f"{file_path_hash}.json"
+        with open("file_list.txt", mode="r", encoding="utf-8") as file:
+            for line in tqdm(file):
+                file_path: str = line.rstrip()
+                file_path_hash: str = generate_file_path_hash(file_path=file_path)
+                file_record_path: Path = base / f"{file_path_hash}.json"
 
-        if not file_record_path.exists():
-            file_record: FileRecord = generate_hash(file_path=file_path)
+                if file_record_path.exists():
+                    with open(file_record_path.resolve().as_posix(), mode="r", encoding="utf-8") as file:
+                        file_record: FileRecord = generate_hash(file_path=file_path, file_record=FileRecord(**json.load(file)))
+                else:
+                    file_record: FileRecord = generate_hash(file_path=file_path)
 
-            with open(file_record_path.resolve().as_posix(), mode="w", encoding="utf-8") as file:
-                file.write(json.dumps(file_record.dict(exclude_unset=True), indent=4))
+                with open(file_record_path.resolve().as_posix(), mode="w", encoding="utf-8") as file:
+                    file.write(json.dumps(file_record.dict(exclude_unset=True), indent=4))
 
 
 if __name__ == "__main__":

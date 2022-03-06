@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -6,7 +6,8 @@ from .hash_metadata import HashMetadata
 
 
 class FileRecord(BaseModel):
-    id: str
+    size: Optional[int]
+    modified: Optional[str]
     path: str
     hash: List[HashMetadata]
 
