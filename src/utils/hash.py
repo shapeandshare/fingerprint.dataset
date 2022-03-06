@@ -18,9 +18,7 @@ def generate_file_path_hash(file_path: str) -> str:
     return filename_hash.hexdigest()
 
 
-def generate_hash(
-    file_path: str, file_record: Optional[FileRecord] = None
-) -> FileRecord:
+def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> FileRecord:
     if file_record:
         partial_record: Dict = file_record.dict(exclude_unset=True)
     else:
@@ -43,17 +41,13 @@ def generate_hash(
     if "modified" not in partial_record:
         partial_record["modified"] = Path(file_path).stat().st_mtime  # unix time stamp
 
-    data: List = [
-        hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA
-    ]
+    data: List = [hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA]
     partial_record["hash"] = data  # filter out other types ..
 
     if len(data) < 1:
         with open(file_path, mode="rb") as file:
             file_hash = hashlib.sha256(file.read())
             file_hex_digest: str = file_hash.hexdigest()
-            partial_record["hash"].append(
-                {"source": SourceType.DATA, "type": "sha256", "value": file_hex_digest}
-            )
+            partial_record["hash"].append({"source": SourceType.DATA, "type": "sha256", "value": file_hex_digest})
 
     return FileRecord(**partial_record)
