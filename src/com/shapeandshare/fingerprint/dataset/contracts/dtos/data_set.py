@@ -31,7 +31,7 @@ class DataSet(BaseModel):
     def __init__(self, recreate: bool = False, index: bool = True, **data: Any):
         super().__init__(**data)
 
-        self.metadata_base = Path(".") / self.name
+        self.metadata_base = Path("") / self.name
         self.hash_path = self.metadata_base / ".hashes"
         self.txt_file = self.metadata_base / f"{self.name}.txt"
         self.csv_file = self.metadata_base / f"{self.name}.csv"

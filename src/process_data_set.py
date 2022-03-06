@@ -1,6 +1,6 @@
 import logging
 
-from .contracts.dtos.data_set import DataSet
+from src.com.shapeandshare.fingerprint.dataset import DataSet
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
