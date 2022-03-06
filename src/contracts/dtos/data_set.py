@@ -36,15 +36,19 @@ class DataSet(BaseModel):
 
         self.hash_path.mkdir(exist_ok=True, parents=True)
 
-    def generate_file_list(self) -> None:
-        logging.info("Reviewing directory structure")
+    def build_index(self) -> None:
+        logging.info("Indexing Search Path")
         with open(file=self.txt_file, mode="w", encoding="utf-8") as file:
             for child in tqdm(self.search_path.glob("**/*")):
                 if child.is_file():
                     file.write(f"{child.resolve().as_posix()}\r\n")
 
-    def generate_file_list_hashes(self) -> None:
-        logging.info("Generating file hashes")
+    def generate_hash(self) -> None:
+        logging.info("Hashing Files")
+
+        if not Path(self.txt_file).exists():
+            self.build_index()
+
         with open(file=self.txt_file, mode="r", encoding="utf-8") as file:
             for line in tqdm(file):
                 file_path: str = line.rstrip()
@@ -62,8 +66,8 @@ class DataSet(BaseModel):
                 with open(file_record_path.resolve().as_posix(), mode="w", encoding="utf-8") as file:
                     file.write(json.dumps(file_record.dict(exclude_unset=True), indent=4))
 
-    def build_csv(self):
-        logging.info("Generating csv")
+    def generate_csv(self):
+        logging.info("Generating CSV")
         # Create headers
         headers: List = ["path", "hash.data", "size", "modified"]
 
@@ -78,7 +82,9 @@ class DataSet(BaseModel):
                         data_hash = [hash for hash in record.hash if hash.source == SourceType.DATA][0]
                         writer.writerow([child.resolve().as_posix(), data_hash.value, record.size, record.modified])
 
-    def export_to_df(self):
+    def generate_dataframe(self):
         logging.info("Generating pickled dataframe")
+        if not Path(self.csv_file).exists():
+            self.generate_csv()
         files_df: pd.DataFrame = pd.read_csv(self.csv_file)
         files_df.to_pickle(path=self.pickle_file, compression={"method": "bz2"})
