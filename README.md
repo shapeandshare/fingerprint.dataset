@@ -1,1 +1,1 @@
-# Generates File Has Reports
+# Generates File Hash Reports
