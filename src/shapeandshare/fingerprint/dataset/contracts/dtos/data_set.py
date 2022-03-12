@@ -42,6 +42,19 @@ class DataSet(BaseModel):
     pickle_file: Optional[Path]
 
     def __init__(self, recreate: bool = False, index: bool = True, **data: Any):
+        """
+        Class Constructor
+
+        Parameters
+        ----------
+        recreate: bool = False
+            Recreate the dataset.
+        index: bool = True
+            Generate data set index during instantiation.
+        data: Any
+            Pydantic object definition for this DTO.
+        """
+
         super().__init__(**data)
 
         self.metadata_base = Path(".") / self.name
@@ -65,6 +78,8 @@ class DataSet(BaseModel):
         Parameters
         ----------
         recreate: bool = False
+            If False pre-existing idex files will be used.
+            If True index is rebuild regardless if its already exists.
         """
 
         logging.getLogger(__name__).info("Indexing Search Path")
@@ -89,7 +104,10 @@ class DataSet(BaseModel):
         Parameters
         ----------
         recreate: bool = False
+            Recreate dataset hashes
         update: bool = False
+            If False existing hashes won't be regenerated.
+            If True all files in the dataset will be rehashed.
         """
 
         logging.getLogger(__name__).info("Hashing Files")
@@ -113,10 +131,9 @@ class DataSet(BaseModel):
                     if not update:
                         continue
 
-                    with open(file_record_path.resolve().as_posix(), mode="r", encoding="utf-8") as file:
-                        file_record: FileRecord = generate_hash(
-                            file_path=file_path, file_record=FileRecord(**json.load(file))
-                        )
+                    file_record: FileRecord = generate_hash(
+                        file_path=file_path, file_record=FileRecord.parse_file(file_record_path.resolve().as_posix())
+                    )
                 else:
                     file_record: FileRecord = generate_hash(file_path=file_path)
 
@@ -140,17 +157,16 @@ class DataSet(BaseModel):
                     child_count += 1
                     file_path: str = child.resolve().as_posix()
                     logging.getLogger(__name__).debug(child.stem)
-                    with open(file=file_path, mode="r", encoding="utf-8") as file:
-                        record: FileRecord = FileRecord(**json.load(file))
-                        data_hash = [hash for hash in record.hash if hash.source == SourceType.DATA][0]
-                        writer.writerow(
-                            [
-                                record.path,
-                                data_hash.value,
-                                record.size,
-                                record.modified,
-                            ]
-                        )
+                    record: FileRecord = FileRecord.parse_file(file_path)
+                    data_hash = [hash for hash in record.hash if hash.source == SourceType.DATA][0]
+                    writer.writerow(
+                        [
+                            record.path,
+                            data_hash.value,
+                            record.size,
+                            record.modified,
+                        ]
+                    )
         if child_count == 0:
             self.csv_file.unlink(missing_ok=True)
             message: str = f"Unable to build CSV, no hash data found in {self.hash_path}"
@@ -159,6 +175,7 @@ class DataSet(BaseModel):
 
     def generate_dataframe(self) -> None:
         """Generate Report Dataframe"""
+
         logging.getLogger(__name__).info("Generating pickled dataframe")
         if not Path(self.csv_file.resolve().as_posix()).exists():
             self.generate_csv()

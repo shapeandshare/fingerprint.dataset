@@ -15,10 +15,11 @@ def generate_file_path_hash(file_path: str) -> str:
     Parameters
     ----------
     file_path: str
-
+        The file path to generate a hex digest hash from.
     Returns
     -------
     hex_digest: str
+        Hex digest of the hash for the provided path.
     """
 
     filename_hash = hashlib.sha256(file_path.encode())
@@ -32,11 +33,14 @@ def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> F
     Parameters
     ----------
     file_path: str
+        The path to the file the hash
     file_record: Optional[FileRecord] = None
+        Optionally perform an update of a provided FileRecord.
 
     Returns
     -------
     file_record: FileRecord
+        A file record with the hash data.
     """
 
     if file_record:
@@ -70,4 +74,4 @@ def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> F
             file_hex_digest: str = file_hash.hexdigest()
             partial_record["hash"].append({"source": SourceType.DATA, "type": "sha256", "value": file_hex_digest})
 
-    return FileRecord(**partial_record)
+    return FileRecord.parse_obj(partial_record)
