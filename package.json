@@ -6,7 +6,7 @@
     "audit": "npm run audit:npm && npm run audit:pip",
     "audit:npm": "npm audit --production",
     "audit:pip": "safety check --full-report",
-    "clean": "rimraf dist src/shapeandshare_fingerprint_dataset.egg-info **/__pycache__",
+    "clean": "rimraf dist src/shapeandshare_fingerprint_dataset.egg-info **/__pycache__ .coverage coverage.xml",
     "prebuild": "pip install -r ./requirements.build.txt && pip install -r ./requirements.test.txt && pip install -r ./requirements.txt",
     "build": "python -m build",
     "lint": "npm run lint:pylint:check && npm run lint:isort:check && npm run lint:black:check",
@@ -17,8 +17,12 @@
     "lint:isort:fix": "isort .",
     "lint:black:fix": "black --line-length=120 --target-version=py310 .",
     "prepare": "husky install",
-    "test": "npm run test:unit",
-    "test:unit": ""
+    "test": "npm run test:unit && npm run coverage",
+    "test:unit": "python test/unit/setup.py",
+    "coverage": "npm run coverage:report && npm run coverage:report:html && npm run coverage:report:xml",
+    "coverage:report": "coverage report",
+    "coverage:report:html": "coverage html",
+    "coverage:report:xml": "coverage xml"
   },
   "author": "Joshua C. Burt",
   "license": "MIT",
