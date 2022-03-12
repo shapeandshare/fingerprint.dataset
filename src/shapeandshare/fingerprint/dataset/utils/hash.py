@@ -1,6 +1,6 @@
 import hashlib
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from ..contracts.dtos.file_record import FileRecord
 from ..contracts.source_type import SourceType

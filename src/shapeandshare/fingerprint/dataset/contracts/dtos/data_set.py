@@ -8,11 +8,11 @@ from typing import Any, List, Optional
 import pandas as pd
 from tqdm import tqdm
 
-from .base_model import BaseModel
-from .file_record import FileRecord
+from ...utils.hash import generate_file_path_hash, generate_hash
 from ..missing_hashes_error import MissingHashesError
 from ..source_type import SourceType
-from ...utils.hash import generate_file_path_hash, generate_hash
+from .base_model import BaseModel
+from .file_record import FileRecord
 
 
 class DataSet(BaseModel):
@@ -24,7 +24,6 @@ class DataSet(BaseModel):
     txt_file: Optional[Path]
     csv_file: Optional[Path]
     pickle_file: Optional[Path]
-
 
     def __init__(self, recreate: bool = False, index: bool = True, **data: Any):
         super().__init__(**data)

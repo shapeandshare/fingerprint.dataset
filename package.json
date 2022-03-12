@@ -1,11 +1,21 @@
 {
-  "name": "com.shapeandshare.fingerprint.dataset",
+  "name": "shapeandshare.fingerprint.dataset",
   "version": "0.2.0",
   "description": "Generates file hash reports",
   "scripts": {
+    "audit": "npm run audit:npm && npm run audit:pip",
+    "audit:npm": "npm audit --production",
+    "audit:pip": "safety check --full-report",
     "clean": "rimraf dist src/shapeandshare_fingerprint_dataset.egg-info **/__pycache__",
     "prebuild": "pip install -r ./requirements.build.txt && pip install -r ./requirements.test.txt && pip install -r ./requirements.txt",
-    "build": "python -m build"
+    "build": "python -m build",
+    "lint": "npm run lint:pylint:check && npm run lint:isort:check && npm run lint:black:check",
+    "lint:pylint:check": "pylint src",
+    "lint:isort:check": "isort --check --diff .",
+    "lint:black:check": "black --line-length=120 --target-version=py310 --check --diff .",
+    "lint:fix": "npm run lint:isort:fix && npm run lint:black:fix",
+    "lint:isort:fix": "isort .",
+    "lint:black:fix": "black --line-length=120 --target-version=py310 ."
   },
   "author": "Joshua C. Burt",
   "license": "MIT",
