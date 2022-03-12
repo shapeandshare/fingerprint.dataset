@@ -1,10 +1,10 @@
 {
   "name": "com.shapeandshare.fingerprint.dataset",
-  "version": "0.1.1b1",
+  "version": "0.2.0",
   "description": "Generates file hash reports",
   "scripts": {
-    "clean": "rimraf dist src/com.shapeandshare.fingerprint.dataset.egg-info **/__pycache__",
-    "prebuild": "pip install -r ./requirements.txt",
+    "clean": "rimraf dist src/shapeandshare_fingerprint_dataset.egg-info **/__pycache__",
+    "prebuild": "pip install -r ./requirements.build.txt && pip install -r ./requirements.test.txt && pip install -r ./requirements.txt",
     "build": "python -m build"
   },
   "author": "Joshua C. Burt",

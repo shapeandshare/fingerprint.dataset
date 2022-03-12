@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 import pandas as pd
-from pydantic import BaseModel
 from tqdm import tqdm
 
+from .base_model import BaseModel
 from .file_record import FileRecord
 from ..missing_hashes_error import MissingHashesError
 from ..source_type import SourceType
@@ -25,8 +25,6 @@ class DataSet(BaseModel):
     csv_file: Optional[Path]
     pickle_file: Optional[Path]
 
-    class Config:
-        arbitrary_types_allowed = True
 
     def __init__(self, recreate: bool = False, index: bool = True, **data: Any):
         super().__init__(**data)
