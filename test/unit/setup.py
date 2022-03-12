@@ -21,7 +21,7 @@ def shell_out(shell_out_cmd: str) -> tuple[str, str, int]:
 
 if __name__ == "__main__":
     cmd: str = (
-        "coverage run --branch --append --rcfile=.coveragerc -m unittest discover --verbose --start-directory test/unit"
+        "coverage run --append --rcfile=.coveragerc -m unittest discover test/unit"
     )
     stdout, stderr, returncode = shell_out(shell_out_cmd=cmd)
     print(stdout)

@@ -1,6 +1,6 @@
 import logging
 
-from com.shapeandshare.fingerprint.dataset import DataSet
+from shapeandshare.fingerprint.dataset import DataSet
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
