@@ -1,28 +1,52 @@
+""" Hash Functions """
+
 import hashlib
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Optional
 
 from ..contracts.dtos.file_record import FileRecord
 from ..contracts.source_type import SourceType
 
 
-def serialize_file_data(files: List[FileRecord]) -> List:
-    raw_list: List = []
-    for file_obj in files:
-        raw_list.append(file_obj.dict(exclude_unset=True))
-    return raw_list
-
-
 def generate_file_path_hash(file_path: str) -> str:
+    """
+    Generate File Path Hash
+
+    Parameters
+    ----------
+    file_path: str
+        The file path to generate a hex digest hash from.
+    Returns
+    -------
+    hex_digest: str
+        Hex digest of the hash for the provided path.
+    """
+
     filename_hash = hashlib.sha256(file_path.encode())
     return filename_hash.hexdigest()
 
 
 def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> FileRecord:
+    """
+    Generate File Hash
+
+    Parameters
+    ----------
+    file_path: str
+        The path to the file the hash
+    file_record: Optional[FileRecord] = None
+        Optionally perform an update of a provided FileRecord.
+
+    Returns
+    -------
+    file_record: FileRecord
+        A file record with the hash data.
+    """
+
     if file_record:
-        partial_record: Dict = file_record.dict(exclude_unset=True)
+        partial_record: dict = file_record.dict(exclude_unset=True)
     else:
-        partial_record: Dict = {}
+        partial_record: dict = {}
 
     if "path" not in partial_record:
         partial_record["path"] = file_path
@@ -41,7 +65,7 @@ def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> F
     if "modified" not in partial_record:
         partial_record["modified"] = Path(file_path).stat().st_mtime  # unix time stamp
 
-    data: List = [hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA]
+    data: list = [hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA]
     partial_record["hash"] = data  # filter out other types ..
 
     if len(data) < 1:
@@ -50,4 +74,4 @@ def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> F
             file_hex_digest: str = file_hash.hexdigest()
             partial_record["hash"].append({"source": SourceType.DATA, "type": "sha256", "value": file_hex_digest})
 
-    return FileRecord(**partial_record)
+    return FileRecord.parse_obj(partial_record)

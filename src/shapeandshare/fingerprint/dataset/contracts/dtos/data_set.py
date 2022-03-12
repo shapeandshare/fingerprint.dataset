@@ -1,21 +1,44 @@
+""" Data Set Definition"""
+
 import csv
 import json
 import logging
 import shutil
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import pandas as pd
-from pydantic import BaseModel
 from tqdm import tqdm
 
-from .file_record import FileRecord
+from ...utils.hash import generate_file_path_hash, generate_hash
 from ..missing_hashes_error import MissingHashesError
 from ..source_type import SourceType
-from ...utils.hash import generate_file_path_hash, generate_hash
+from .base_model import BaseModel
+from .file_record import FileRecord
 
 
 class DataSet(BaseModel):
+    """
+    DataSet DTO
+
+    Attributes
+    ----------
+    search_path: Path
+        The base path to form the data set from.
+    name: str
+        The name of the dataset.
+    metadata_base: Optional[Path]
+        The project base.
+    hash_path: Optional[Path]
+        The path to store hash data in.
+    txt_file: Optional[Path]
+        The index file path.
+    csv_file: Optional[Path]
+        The CSV report file path.
+    pickle_file: Optional[Path]
+        The pickled dataframe file path.
+    """
+
     search_path: Path
     name: str
 
@@ -25,13 +48,23 @@ class DataSet(BaseModel):
     csv_file: Optional[Path]
     pickle_file: Optional[Path]
 
-    class Config:
-        arbitrary_types_allowed = True
-
     def __init__(self, recreate: bool = False, index: bool = True, **data: Any):
+        """
+        Class Constructor
+
+        Parameters
+        ----------
+        recreate: bool = False
+            Recreate the dataset.
+        index: bool = True
+            Generate data set index during instantiation.
+        data: Any
+            Pydantic object definition for this DTO.
+        """
+
         super().__init__(**data)
 
-        self.metadata_base = Path("") / self.name
+        self.metadata_base = Path(".") / self.name
         self.hash_path = self.metadata_base / ".hashes"
         self.txt_file = self.metadata_base / f"{self.name}.txt"
         self.csv_file = self.metadata_base / f"{self.name}.csv"
@@ -46,6 +79,16 @@ class DataSet(BaseModel):
             self.build_index()
 
     def build_index(self, recreate: bool = False) -> None:
+        """
+        Build Data Set Index File
+
+        Parameters
+        ----------
+        recreate: bool = False
+            If False pre-existing idex files will be used.
+            If True index is rebuild regardless if its already exists.
+        """
+
         logging.getLogger(__name__).info("Indexing Search Path")
         if recreate and self.txt_file.exists():
             logging.getLogger(__name__).info("Removing existing index")
@@ -62,6 +105,18 @@ class DataSet(BaseModel):
                         logging.getLogger(__name__).debug(file_path)
 
     def hash(self, recreate: bool = False, update: bool = False) -> None:
+        """
+        Perform Data Set Hashing
+
+        Parameters
+        ----------
+        recreate: bool = False
+            Recreate dataset hashes
+        update: bool = False
+            If False existing hashes won't be regenerated.
+            If True all files in the dataset will be rehashed.
+        """
+
         logging.getLogger(__name__).info("Hashing Files")
 
         if recreate and self.hash_path.exists():
@@ -83,10 +138,9 @@ class DataSet(BaseModel):
                     if not update:
                         continue
 
-                    with open(file_record_path.resolve().as_posix(), mode="r", encoding="utf-8") as file:
-                        file_record: FileRecord = generate_hash(
-                            file_path=file_path, file_record=FileRecord(**json.load(file))
-                        )
+                    file_record: FileRecord = generate_hash(
+                        file_path=file_path, file_record=FileRecord.parse_file(file_record_path.resolve().as_posix())
+                    )
                 else:
                     file_record: FileRecord = generate_hash(file_path=file_path)
 
@@ -94,9 +148,11 @@ class DataSet(BaseModel):
                     file.write(json.dumps(file_record.dict(exclude_unset=True), indent=4))
 
     def generate_csv(self) -> None:
+        """Generate Report CSV"""
+
         logging.getLogger(__name__).info("Generating CSV")
         # Create headers
-        headers: List = ["path", "hash", "size", "modified"]
+        headers: list = ["path", "hash", "size", "modified"]
 
         child_count: int = 0
         with open(self.csv_file.resolve().as_posix(), mode="w", encoding="utf-8", newline="") as file:
@@ -108,23 +164,25 @@ class DataSet(BaseModel):
                     child_count += 1
                     file_path: str = child.resolve().as_posix()
                     logging.getLogger(__name__).debug(child.stem)
-                    with open(file=file_path, mode="r", encoding="utf-8") as file:
-                        record: FileRecord = FileRecord(**json.load(file))
-                        data_hash = [hash for hash in record.hash if hash.source == SourceType.DATA][0]
-                        writer.writerow(
-                            [
-                                record.path,
-                                data_hash.value,
-                                record.size,
-                                record.modified,
-                            ]
-                        )
+                    record: FileRecord = FileRecord.parse_file(file_path)
+                    data_hash = [hash for hash in record.hash if hash.source == SourceType.DATA][0]
+                    writer.writerow(
+                        [
+                            record.path,
+                            data_hash.value,
+                            record.size,
+                            record.modified,
+                        ]
+                    )
         if child_count == 0:
             self.csv_file.unlink(missing_ok=True)
-            logging.getLogger(__name__).warning(f"Unable to build CSV, no hash data found in {self.hash_path}")
-            raise MissingHashesError(f"Unable to build CSV, no hash data found in {self.hash_path}")
+            message: str = f"Unable to build CSV, no hash data found in {self.hash_path}"
+            logging.getLogger(__name__).warning(message)
+            raise MissingHashesError(message)
 
     def generate_dataframe(self) -> None:
+        """Generate Report Dataframe"""
+
         logging.getLogger(__name__).info("Generating pickled dataframe")
         if not Path(self.csv_file.resolve().as_posix()).exists():
             self.generate_csv()
