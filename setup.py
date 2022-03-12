@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="shapeandshare-fingerprint-dataset",
-    version="0.2.0",
+    version="0.3.0",
     author="Joshua C. Burt",
     author_email="joshburt@shapeandshare.com",
     description="Generates file hash reports",

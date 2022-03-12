@@ -27,6 +27,8 @@ class DataSet(BaseModel):
         The base path to form the data set from.
     name: str
         The name of the dataset.
+    metadata_root: Optional[Path]
+        The projects base.
     metadata_base: Optional[Path]
         The project base.
     hash_path: Optional[Path]
@@ -42,13 +44,14 @@ class DataSet(BaseModel):
     search_path: Path
     name: str
 
+    metadata_root: Optional[Path]
     metadata_base: Optional[Path]
     hash_path: Optional[Path]
     txt_file: Optional[Path]
     csv_file: Optional[Path]
     pickle_file: Optional[Path]
 
-    def __init__(self, recreate: bool = False, index: bool = True, **data: Any):
+    def __init__(self, recreate: bool = False, index: bool = True, metadata_root: Optional[str] = None, **data: Any):
         """
         Class Constructor
 
@@ -64,19 +67,28 @@ class DataSet(BaseModel):
 
         super().__init__(**data)
 
-        self.metadata_base = Path(".") / self.name
+        if metadata_root:
+            self.metadata_root = Path(metadata_root)
+            self.metadata_root.mkdir(exist_ok=True, parents=True)
+        else:
+            self.metadata_root = Path(".")
+
+        self.metadata_base = self.metadata_root / self.name
+        if recreate and self.metadata_base.exists() and self.metadata_base.is_dir():
+            logging.getLogger(__name__).warning(f"Remove pre-existing dataset ({self.name})")
+            shutil.rmtree(self.metadata_base)
+        self.metadata_base.mkdir(exist_ok=True, parents=True)
+
         self.hash_path = self.metadata_base / ".hashes"
+        self.hash_path.mkdir(exist_ok=True, parents=True)
+
         self.txt_file = self.metadata_base / f"{self.name}.txt"
         self.csv_file = self.metadata_base / f"{self.name}.csv"
         self.pickle_file = self.metadata_base / f"{self.name}.df.pkl.bz2"
 
-        if recreate and self.metadata_base.exists() and self.metadata_base.is_dir():
-            shutil.rmtree(self.metadata_base)
-        self.metadata_base.mkdir(exist_ok=True, parents=True)
-        self.hash_path.mkdir(exist_ok=True, parents=True)
-
         if index:
-            self.build_index()
+            logging.getLogger(__name__).info("Auto-Indexing")
+            self.build_index(recreate=recreate)
 
     def build_index(self, recreate: bool = False) -> None:
         """
@@ -85,7 +97,7 @@ class DataSet(BaseModel):
         Parameters
         ----------
         recreate: bool = False
-            If False pre-existing idex files will be used.
+            If False pre-existing index files will be used.
             If True index is rebuild regardless if its already exists.
         """
 
