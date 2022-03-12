@@ -49,6 +49,11 @@ class TestDataSet(unittest.TestCase):
         dataset: DataSet = DataSet(name=self.name, search_path=self.search_path, recreate=False)
         dataset.build_index()
         dataset.build_index(recreate=True)
+        dataset.hash()
+        dataset.hash(recreate=True)
+        dataset.hash(update=True)
+        dataset.generate_dataframe()
+        dataset.generate_dataframe()
 
     def test_should_run_normally(self):
         dataset: DataSet = DataSet(name=self.name, search_path=self.search_path)

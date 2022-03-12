@@ -6,13 +6,6 @@ from ..contracts.dtos.file_record import FileRecord
 from ..contracts.source_type import SourceType
 
 
-def serialize_file_data(files: List[FileRecord]) -> List:
-    raw_list: List = []
-    for file_obj in files:
-        raw_list.append(file_obj.dict(exclude_unset=True))
-    return raw_list
-
-
 def generate_file_path_hash(file_path: str) -> str:
     filename_hash = hashlib.sha256(file_path.encode())
     return filename_hash.hexdigest()
