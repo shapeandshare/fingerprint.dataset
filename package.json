@@ -6,7 +6,7 @@
     "audit": "npm run audit:npm && npm run audit:pip",
     "audit:npm": "npm audit --production",
     "audit:pip": "safety check --full-report",
-    "clean": "rimraf dist src/shapeandshare_fingerprint_dataset.egg-info **/__pycache__ .coverage coverage.xml",
+    "clean": "rimraf dist src/shapeandshare_fingerprint_dataset.egg-info **/__pycache__ .coverage coverage.xml htmlcov",
     "prebuild": "pip install -r ./requirements.build.txt && pip install -r ./requirements.test.txt && pip install -r ./requirements.txt",
     "build": "python -m build",
     "lint": "npm run lint:pylint:check && npm run lint:isort:check && npm run lint:black:check",
