@@ -24,12 +24,19 @@ class DataSet(BaseModel):
     Attributes
     ----------
     search_path: Path
+        The base path to form the data set from.
     name: str
+        The name of the dataset.
     metadata_base: Optional[Path]
+        The project base.
     hash_path: Optional[Path]
+        The path to store hash data in.
     txt_file: Optional[Path]
+        The index file path.
     csv_file: Optional[Path]
+        The CSV report file path.
     pickle_file: Optional[Path]
+        The pickled dataframe file path.
     """
 
     search_path: Path
