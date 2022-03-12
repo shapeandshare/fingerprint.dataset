@@ -1,6 +1,6 @@
 {
   "name": "shapeandshare.fingerprint.dataset",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Generates file hash reports",
   "scripts": {
     "audit": "npm run audit:npm && npm run audit:pip",
