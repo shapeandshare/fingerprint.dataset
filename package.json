@@ -15,11 +15,15 @@
     "lint:black:check": "black --line-length=120 --target-version=py310 --check --diff .",
     "lint:fix": "npm run lint:isort:fix && npm run lint:black:fix",
     "lint:isort:fix": "isort .",
-    "lint:black:fix": "black --line-length=120 --target-version=py310 ."
+    "lint:black:fix": "black --line-length=120 --target-version=py310 .",
+    "prepare": "husky install",
+    "test": "npm run test:unit",
+    "test:unit": ""
   },
   "author": "Joshua C. Burt",
   "license": "MIT",
   "devDependencies": {
+    "husky": "^7.0.4",
     "rimraf": "^3.0.2"
   }
 }
