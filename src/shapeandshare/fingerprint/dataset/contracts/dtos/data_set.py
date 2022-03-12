@@ -1,9 +1,11 @@
+""" Data Set Definition"""
+
 import csv
 import json
 import logging
 import shutil
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import pandas as pd
 from tqdm import tqdm
@@ -16,6 +18,20 @@ from .file_record import FileRecord
 
 
 class DataSet(BaseModel):
+    """
+    DataSet DTO
+
+    Attributes
+    ----------
+    search_path: Path
+    name: str
+    metadata_base: Optional[Path]
+    hash_path: Optional[Path]
+    txt_file: Optional[Path]
+    csv_file: Optional[Path]
+    pickle_file: Optional[Path]
+    """
+
     search_path: Path
     name: str
 
@@ -43,6 +59,14 @@ class DataSet(BaseModel):
             self.build_index()
 
     def build_index(self, recreate: bool = False) -> None:
+        """
+        Build Data Set Index File
+
+        Parameters
+        ----------
+        recreate: bool = False
+        """
+
         logging.getLogger(__name__).info("Indexing Search Path")
         if recreate and self.txt_file.exists():
             logging.getLogger(__name__).info("Removing existing index")
@@ -59,6 +83,15 @@ class DataSet(BaseModel):
                         logging.getLogger(__name__).debug(file_path)
 
     def hash(self, recreate: bool = False, update: bool = False) -> None:
+        """
+        Perform Data Set Hashing
+
+        Parameters
+        ----------
+        recreate: bool = False
+        update: bool = False
+        """
+
         logging.getLogger(__name__).info("Hashing Files")
 
         if recreate and self.hash_path.exists():
@@ -91,9 +124,11 @@ class DataSet(BaseModel):
                     file.write(json.dumps(file_record.dict(exclude_unset=True), indent=4))
 
     def generate_csv(self) -> None:
+        """Generate Report CSV"""
+
         logging.getLogger(__name__).info("Generating CSV")
         # Create headers
-        headers: List = ["path", "hash", "size", "modified"]
+        headers: list = ["path", "hash", "size", "modified"]
 
         child_count: int = 0
         with open(self.csv_file.resolve().as_posix(), mode="w", encoding="utf-8", newline="") as file:
@@ -118,10 +153,12 @@ class DataSet(BaseModel):
                         )
         if child_count == 0:
             self.csv_file.unlink(missing_ok=True)
-            logging.getLogger(__name__).warning(f"Unable to build CSV, no hash data found in {self.hash_path}")
-            raise MissingHashesError(f"Unable to build CSV, no hash data found in {self.hash_path}")
+            message: str = f"Unable to build CSV, no hash data found in {self.hash_path}"
+            logging.getLogger(__name__).warning(message)
+            raise MissingHashesError(message)
 
     def generate_dataframe(self) -> None:
+        """Generate Report Dataframe"""
         logging.getLogger(__name__).info("Generating pickled dataframe")
         if not Path(self.csv_file.resolve().as_posix()).exists():
             self.generate_csv()

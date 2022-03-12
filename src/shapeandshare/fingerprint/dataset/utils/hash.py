@@ -1,21 +1,48 @@
+""" Hash Functions """
+
 import hashlib
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 from ..contracts.dtos.file_record import FileRecord
 from ..contracts.source_type import SourceType
 
 
 def generate_file_path_hash(file_path: str) -> str:
+    """
+    Generate File Path Hash
+
+    Parameters
+    ----------
+    file_path: str
+
+    Returns
+    -------
+    hex_digest: str
+    """
+
     filename_hash = hashlib.sha256(file_path.encode())
     return filename_hash.hexdigest()
 
 
 def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> FileRecord:
+    """
+    Generate File Hash
+
+    Parameters
+    ----------
+    file_path: str
+    file_record: Optional[FileRecord] = None
+
+    Returns
+    -------
+    file_record: FileRecord
+    """
+
     if file_record:
-        partial_record: Dict = file_record.dict(exclude_unset=True)
+        partial_record: dict = file_record.dict(exclude_unset=True)
     else:
-        partial_record: Dict = {}
+        partial_record: dict = {}
 
     if "path" not in partial_record:
         partial_record["path"] = file_path
@@ -34,7 +61,7 @@ def generate_hash(file_path: str, file_record: Optional[FileRecord] = None) -> F
     if "modified" not in partial_record:
         partial_record["modified"] = Path(file_path).stat().st_mtime  # unix time stamp
 
-    data: List = [hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA]
+    data: list = [hash for hash in partial_record["hash"] if hash["source"] == SourceType.DATA]
     partial_record["hash"] = data  # filter out other types ..
 
     if len(data) < 1:
