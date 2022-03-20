@@ -11,6 +11,7 @@ setuptools.setup(
     description="Generates file hash reports",
     long_description=long_description,
     long_description_content_type="text/markdown",
+
     package_dir={"": "src"},
     packages=setuptools.find_namespace_packages(where="src"),
     python_requires=">=3.9",
