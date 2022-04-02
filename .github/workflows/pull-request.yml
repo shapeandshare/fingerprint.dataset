@@ -33,7 +33,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install sacr
-        sacr run prebuild
+#        sacr run prebuild
+        python -m pip install -r ./requirements.build.txt
+        python -m pip install -r ./requirements.test.txt
+        python -m pip install -r ./requirements.txt
     - name: Run Auditing
       run: |
         sacr run audit
