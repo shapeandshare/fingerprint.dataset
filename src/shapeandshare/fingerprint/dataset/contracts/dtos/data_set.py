@@ -75,7 +75,7 @@ class DataSet(BaseModel):
 
         self.metadata_base = self.metadata_root / self.name
         if recreate and self.metadata_base.exists() and self.metadata_base.is_dir():
-            logging.getLogger(__name__).warning(f"Remove pre-existing dataset ({self.name})")
+            logging.getLogger(__name__).warning("Remove pre-existing dataset (%s)", self.name)
             shutil.rmtree(self.metadata_base)
         self.metadata_base.mkdir(exist_ok=True, parents=True)
 
