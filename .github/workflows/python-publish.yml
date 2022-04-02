@@ -22,11 +22,22 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.9'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build
+        python -m pip install sacr
+        sacr run prebuild
+    - name: Run Auditing
+      run: |
+        sacr run audit
+    - name: Run Linting
+      run: |
+        sacr run lint
+    - name: Run Tests
+      run: |
+        sacr run test
+        sacr run coverage
     - name: Build package
       run: python -m build
     - name: Publish package
