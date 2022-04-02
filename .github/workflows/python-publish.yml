@@ -9,16 +9,14 @@
 name: Upload Python Package
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ master ]
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -28,16 +26,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install sacr
         sacr run prebuild
-    - name: Run Auditing
-      run: |
-        sacr run audit
-    - name: Run Linting
-      run: |
-        sacr run lint
-    - name: Run Tests
-      run: |
-        sacr run test
-        sacr run coverage
     - name: Build package
       run: python -m build
     - name: Publish package
